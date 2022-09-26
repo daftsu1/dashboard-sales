@@ -257,39 +257,6 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23#{$color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-search'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
 }
 
-.search-bar {
-  background-color: var(--app-content-secondary-color);
-  border: 1px solid var(--app-content-secondary-color);
-  color: var(--app-content-main-color);
-  font-size: $font-small;
-  line-height: 24px;
-  border-radius: 4px;
-  padding: 0px 10px 0px 32px;
-  height: 32px;
-  @include searchIcon('fff');
-  background-size: 16px;
-  background-repeat: no-repeat;
-  background-position: left 10px center;
-  width: 100%;
-  max-width: 320px;
-  transition: .2s;
-  
-  .light & { @include searchIcon('1f1c2e'); }
-  
-  &:placeholder { color: var(--app-content-main-color); }
-  
-  &:hover {
-    border-color: var(--action-color-hover);
-    @include searchIcon('6291fd');
-  }
-  
-  &:focus {
-    outline: none;
-    border-color: var(--action-color);
-    @include searchIcon('2869ff');
-  }
-}
-
 .action-button {
   border-radius: 4px;
   height: 32px;
@@ -631,6 +598,10 @@ body {
   
 }
 
+tr{
+  border-style: hidden !important;
+}
+
 .content-table{
   flex: 1;
   padding: 8px 16px;
@@ -725,3 +696,90 @@ img {
   </table>
 </div>
 </template>
+
+<script>
+import { getDatabase, limitToLast, onValue, orderByChild, query, ref } from "firebase/database";
+import { initializeApp } from "firebase/app";
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBnAcnK7MnvHRR65EuYj9z7JnvqPmXAxp8",
+  authDomain: "holospet.firebaseapp.com",
+  databaseURL: "https://holospet-default-rtdb.firebaseio.com",
+  projectId: "holospet",
+  storageBucket: "holospet.appspot.com",
+  messagingSenderId: "109179859362",
+  appId: "1:109179859362:web:cf465cda1585d3cc6802fb",
+  measurementId: "G-J970VEYDMG"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const database = getDatabase(app);
+
+const initialState = () => {
+  return{
+    data: [],
+  }
+}
+
+export default{
+  name: 'Dahsboard',
+  components: {
+    
+  },
+  data() {
+    return initialState();
+  },
+  created() {
+    this.data = [];
+    this.getSales();
+  },
+  beforeUpdate() {
+    this.data = [];
+    this.getSales();
+  },
+
+  methods:{
+    async getSales() {
+      const refSales = query(ref(database, 'sales'), limitToLast(60));
+      
+      //agregar estados preparar pedido-cargar pedido .... y el estado actual, si se preparo o no o si ya se cargo o no.
+      onValue(refSales, (snapshot) => {        
+        let data_sales = [];
+        let salesData = snapshot.val();
+
+        for (let key in salesData) {
+          if(salesData[key].data_hiboutik.completed_at =! null){
+            let sale = salesData[key];
+            let line_items = sale.data_hiboutik.line_items == "" ? 'no definida' : sale.data_hiboutik.line_items;
+            let comment_hb;
+
+            if(sale.data_hiboutik.comments != "" && sale.data_hiboutik.comments != null && sale.data_hiboutik.comments != undefined){
+              comment_hb = sale.data_hiboutik.comments == "" ? '-': sale.data_hiboutik.comments;
+            }
+
+            for(let i=0; i < line_items.length; i++){
+              let product_id = line_items[i].product_id;
+              line_items[i]['url_image'] = 'https://btcmarket.hiboutik.com/images/products/big_'+product_id+'-1.jpg';
+            }
+
+            this.data = [];
+
+            data_sales.push({
+              id: key,
+              productos: line_items,
+              comentario: comment_hb,
+            });
+          }     
+        }
+
+        this.data = data_sales;
+        console.log(this.data);           
+      });
+    }
+  }  
+}
+
+</script>

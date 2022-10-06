@@ -581,6 +581,7 @@ body {
 
 body {
   background-color: #1d283c;
+  overflow: initial;
 }
 
 .cell-table{
@@ -616,6 +617,19 @@ tr{
   }
 }
 
+.content-sub-table{
+  flex: 1;
+  color: var(--app-content-main-color);
+  font-size: 14px;
+  text-align: center;
+  border-bottom-width: 0px !important;
+  font-weight: 300;
+
+  &.number {
+    text-align: right !important;
+  }
+}
+
 .status {
   border-radius: 4px;
   align-items: center;
@@ -633,65 +647,111 @@ tr{
   }
   
   &.active {
-    color: #2ba972;
-    background-color: rgba(43, 169, 114, 0.2);
-    
+   color: #32ff00;
+  background-color: #34ff073d;
+
     &:before {
       background-color: #2ba972;
     }
   }
-  
-  &.disabled {
-    color: #59719d;
-    background-color: rgba(89, 113, 157, 0.2);
+
+  &.inactive {
+    color: #ffa200;
+   background-color: #ffc1073d;
     
     &:before {
-      background-color: #59719d;
-    }
-  }
-  
-    &.sin_cargar {
-    color: #a9312b;
-    background-color: rgba(43, 169, 114, 0.2);
-    
-    &:before {
-      background-color: #2ba972;
+      background-color: #ff0000;
     }
   }
 }
 
 img {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 6px;
   margin-right: 6px;
 }
     
+.list-enter-active,
+.list-leave-active {
+  transition: all .5s ease-in-out;
+}
+
+.list-enter-from{
+  transform: scaleY(0);
+  transform-origin: left top;
+  flex-direction: column;
+  
+}
+
+.list-enter,
+.list-leave-to {
+  transform: scaleY(0);
+  transform-origin: left top;
+  flex-grow:0 !important;
+}
+
+.color{
+  color: red;
+}
 
 </style>
 
 <template>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
 <div style="background-color: #101827">
   <table class="table" style="width: 98%; margin-left: 1rem; margin-right: 63rem;border-radius: 1em; overflow: hidden;">
     <thead class="header-table">
       <tr>
-          <th scope="col" class="cell-table">Id Venta</th>
+          <th scope="col" style="width: 75px" class="cell-table">Id Venta</th>
+          <th scope="col" style="width: 95px" class="cell-table">Hora</th>
           <th scope="col" class="cell-table">Producto</th>
-          <th scope="col" class="cell-table">Cantidad</th>
+          <th scope="col" style="text-align: left;" class="cell-table">Cantidad</th>
           <th scope="col" class="cell-table">Acción</th>
-          <th scope="col" class="cell-table">Comentario</th>
           <th scope="col" class="cell-table">Estado</th>
       </tr>
     </thead>
     <tbody id="tbody_sale">
-      <tr>
-        <td class="content-table">56630</td>
-        <td class="content-table"><img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" alt="product"> PRODUCTO DE EJEMPLO AAAAAA</td>
-        <td class="content-table number">1</td>
-        <td class="content-table"><span class="status active">Preparar</span></td>
-        <td class="content-table">La venta debe ser entregada a las 15</td>
-        <td class="content-table"><span class="status sin_cargar">Sin cargar</span></td>
-      </tr>
+      <template v-for="(item) in data">
+        <tr>
+          <td class="content-table">{{item.id}}</td>
+          <td class="content-table">{{item.fecha_carga}}</td>
+          <td class="content-table" style="text-align:left;">
+            <div style="font-size: small" class="images" v-viewer="{toolbar: false, navbar: false, title: false}">
+              <img :src="item.productos[0].url_image" />
+              {{item.productos[0].product_model}}
+            </div>
+            
+          </td>
+          <td class="content-table">{{item.productos[0].quantity}}</td>
+          <td class="content-table"  v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]" v-if="item.state == 'no_cargado'">Delivery <span v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">inventory_2</span></td>
+          <td class="content-table" v-else-if="item.state == 'preparar_retiro'">Retiro en tienda</td>
+          <td class="content-table" v-else-if="item.state == 'envio'">Preparar envio</td>
+          <td class="content-table" style="color: #ffb81c" v-else-if="item.state == 'envio_chilexpress'">Chilexpress</td>
+          <td class="content-table" v-else-if="item.state == 'cambio_tienda'">Cambio de tienda</td>
+          <td class="content-table" v-else-if="item.state == 'programado'">Programado</td>
+          <td class="content-table" v-else-if="item.state == 'cargado'"></td>
+          <td class="content-table" v-else></td>
+          
+          <td class="content-table"  v-if="item.state != 'cargado'"> <span v-bind:id="item.id" v-on:click="update_status_order($event)" class="status inactive ">Cargar</span> </td>
+          <td class="content-table"  v-else><span class="status active">Listo</span></td>
+        </tr>
+        <tr v-for="(item2, index2) in item.productos.slice(1)" :key="index2">
+          <td></td>
+          <td></td>
+          <td colspan="2">
+            <tr style="width:94%; display:table; padding-bottom: 10px;">
+              <td rowspan="1" class="content-sub-table" style="text-align:left; padding-bottom: 11px;">
+                <div class="images" v-viewer="{toolbar: false, navbar: false, title: false}">
+                  <img :src="item2.url_image" />
+                  {{item2.product_model}}
+                </div>
+              </td>
+              <td class="content-sub-table" style="text-align:right"> {{ item2.quantity}} </td>
+            </tr>
+          </td>
+        </tr>
+      </template>
     </tbody>
   </table>
 </div>
@@ -700,6 +760,9 @@ img {
 <script>
 import { getDatabase, limitToLast, onValue, orderByChild, query, ref } from "firebase/database";
 import { initializeApp } from "firebase/app";
+import axios from 'axios';
+import "viewerjs/dist/viewer.css";
+import Viewer from "v-viewer";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -710,8 +773,8 @@ const firebaseConfig = {
   projectId: "holospet",
   storageBucket: "holospet.appspot.com",
   messagingSenderId: "109179859362",
-  appId: "1:109179859362:web:cf465cda1585d3cc6802fb",
-  measurementId: "G-J970VEYDMG"
+  appId: "1:109179859362:web:78bbc4473f0acf746802fb",
+  measurementId: "G-E13VN0KJ8S"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -721,14 +784,16 @@ const database = getDatabase(app);
 const initialState = () => {
   return{
     data: [],
-  }
+    active: false,
+    }
 }
 
 export default{
   name: 'Dahsboard',
   components: {
-    
+    Viewer,
   },
+  
   data() {
     return initialState();
   },
@@ -743,26 +808,49 @@ export default{
 
   methods:{
     async getSales() {
-      const refSales = query(ref(database, 'sales'), limitToLast(60));
+      const refSales = query(ref(database, 'store'), limitToLast(60));
       
       //agregar estados preparar pedido-cargar pedido .... y el estado actual, si se preparo o no o si ya se cargo o no.
       onValue(refSales, (snapshot) => {        
         let data_sales = [];
         let salesData = snapshot.val();
+        console.log(salesData);
 
         for (let key in salesData) {
           if(salesData[key].data_hiboutik.completed_at =! null){
             let sale = salesData[key];
             let line_items = sale.data_hiboutik.line_items == "" ? 'no definida' : sale.data_hiboutik.line_items;
             let comment_hb;
+            let status;
+            let date_load;
 
             if(sale.data_hiboutik.comments != "" && sale.data_hiboutik.comments != null && sale.data_hiboutik.comments != undefined){
               comment_hb = sale.data_hiboutik.comments == "" ? '-': sale.data_hiboutik.comments;
             }
 
+            if(sale.data_loader.status_load != "" && sale.data_loader.status_load != null && sale.data_loader.status_load != undefined){
+              status = sale.data_loader.status_load == "" ? '-' : sale.data_loader.status_load; 
+            }else{
+              status = '-';
+            }
+
+            if(sale.data_loader.date_loader != "" && sale.data_loader.date_loader != null && sale.data_loader.date_loader != undefined){
+              date_load = sale.data_loader.date_loader == "" ? '-' : sale.data_loader.date_loader;
+            }else{
+              date_load = '00-00-0000 00:00:00';
+            }
+
+            let pickup_date = sale.data_hiboutik.pickup_date == "0000-00-00 00:00:00" ? '-' : sale.data_hiboutik.pickup_date;
+
             for(let i=0; i < line_items.length; i++){
               let product_id = line_items[i].product_id;
-              line_items[i]['url_image'] = 'https://btcmarket.hiboutik.com/images/products/big_'+product_id+'-1.jpg';
+              let product_name = line_items[i].product_model;
+              line_items[i].product_model = product_name.charAt(0).toUpperCase() + product_name.slice(1).toLowerCase();
+              if(product_id == '3019'){
+                line_items.splice(i, 1)
+              }else{
+                line_items[i]['url_image'] = 'https://btcmarket.hiboutik.com/images/products/big_'+product_id+'-1.jpg';
+              }
             }
 
             this.data = [];
@@ -770,16 +858,112 @@ export default{
             data_sales.push({
               id: key,
               productos: line_items,
-              comentario: comment_hb,
+              state: status,
+              fecha_carga: date_load,
+              fecha_programado: pickup_date,
             });
           }     
         }
 
-        this.data = data_sales;
-        console.log(this.data);           
+        let array1 = [];
+        let array2 = [];
+        let array3 = [];
+        let array4 = [];
+        let array5 = [];
+        let array6 = [];
+        let array7 = [];
+        let array8 = [];
+
+        for(let i=0; i < data_sales.length; i++){
+          switch(data_sales[i].state){
+            case 'no_cargado':
+              array1.unshift(data_sales[i]);
+
+              break;
+            case 'preparar_retiro':
+              array2.unshift(data_sales[i]);
+
+              break;
+            case 'envio_chilexpress':
+              array3.unshift(data_sales[i]);
+
+              break;
+            case 'envio':
+              array4.unshift(data_sales[i]);
+
+              break;
+            case 'programado':
+              console.log(data_sales[i].id)
+              console.log(data_sales[i].state)
+              array5.unshift(data_sales[i]);
+
+              break;
+            case 'cambio_tienda':
+              console.log(data_sales[i].id)
+              console.log(data_sales[i].state)
+              array6.unshift(data_sales[i]);
+
+              break;
+            case 'cargado':
+              array7.unshift(data_sales[i]);
+
+              break;
+          }
+        }
+
+        array1.sort(function(a,b){
+          return b.fecha_carga.localeCompare(a.fecha_carga);
+        })
+
+        array2.sort(function(a,b){
+          return b.fecha_carga.localeCompare(a.fecha_carga);
+        })
+
+        array3.sort(function(a,b){
+          return b.fecha_carga.localeCompare(a.fecha_carga);
+        })
+
+        array4.sort(function(a,b){
+          return b.fecha_carga.localeCompare(a.fecha_carga);
+        })
+
+        array5.sort(function(a,b){
+          return b.fecha_carga.localeCompare(a.fecha_carga);
+        })
+
+        array6.sort(function(a,b){
+          return b.fecha_carga.localeCompare(a.fecha_carga);
+        })
+
+        array7.sort(function(a,b){
+          return b.fecha_carga.localeCompare(a.fecha_carga);
+        })
+
+        const array_final = [...array1, ...array2, ...array3, ...array4, ...array5, ...array6, ...array7];
+
+        this.data = array_final;
+        console.log(this.data);
       });
+    },
+
+    update_status_order(event) {
+      const status = 'cargado';
+      const id_sale = event.target.id;
+      console.log(event.target.id);
+
+      axios.post('https://us-central1-holospet.cloudfunctions.net/app/update_status_loader/'+id_sale, {
+        sale_id: id_sale,
+        status: status
+      }).then(response => {
+        console.log(response);
+      }).catch(error => {
+        console.log(error);
+      });
+    },
+    clickImage: function(index){
+        console.log(index)
     }
-  }  
+  }
 }
 
 </script>

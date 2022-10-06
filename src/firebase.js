@@ -10,8 +10,8 @@ const firebaseConfig = {
   projectId: "holospet",
   storageBucket: "holospet.appspot.com",
   messagingSenderId: "109179859362",
-  appId: "1:109179859362:web:cf465cda1585d3cc6802fb",
-  measurementId: "G-J970VEYDMG"
+  appId: "1:109179859362:web:78bbc4473f0acf746802fb",
+  measurementId: "G-E13VN0KJ8S"
 };
 
 

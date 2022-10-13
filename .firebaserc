@@ -7,6 +7,9 @@
       "hosting": {
         "tablet": [
           "tablet-holospet"
+        ],
+        "tablet-warehouse": [
+          "tablet-holospet-bodega"
         ]
       }
     }

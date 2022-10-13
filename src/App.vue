@@ -666,8 +666,8 @@ tr{
 }
 
 img {
-  width: 40px;
-  height: 40px;
+  width: 70px;
+  height: 70px;
   border-radius: 6px;
   margin-right: 6px;
 }
@@ -704,9 +704,9 @@ img {
     <thead class="header-table">
       <tr>
           <th scope="col" style="width: 75px" class="cell-table">Id Venta</th>
-          <th scope="col" style="width: 95px" class="cell-table">Hora</th>
           <th scope="col" class="cell-table">Producto</th>
           <th scope="col" style="text-align: left;" class="cell-table">Cantidad</th>
+          <th scope="col" style="text-align: left;" class="cell-table">Check</th>
           <th scope="col" class="cell-table">Acción</th>
           <th scope="col" class="cell-table">Estado</th>
       </tr>
@@ -715,7 +715,6 @@ img {
       <template v-for="(item) in data">
         <tr>
           <td class="content-table">{{item.id}}</td>
-          <td class="content-table">{{item.fecha_carga}}</td>
           <td class="content-table" style="text-align:left;">
             <div style="font-size: small" class="images" v-viewer="{toolbar: false, navbar: false, title: false}">
               <img :src="item.productos[0].url_image" />
@@ -724,6 +723,8 @@ img {
             
           </td>
           <td class="content-table">{{item.productos[0].quantity}}</td>
+          <td class="content-table" v-if="item.state != 'cargado' && item.state != 'eliminado'"><input style="padding: 0px" class="form-check-input" type="checkbox" v-bind:aria-label="item.id" v-on:click="update_checked($event)" v-model="item.productos[0].loaded" id="0"></td>
+          <td class="content-table" v-else></td>
           <td class="content-table"  v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]" v-if="item.state == 'no_cargado'">Delivery <span v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">inventory_2</span></td>
           <td class="content-table" v-else-if="item.state == 'preparar_retiro'">Retiro en tienda</td>
           <td class="content-table" v-else-if="item.state == 'envio'">Preparar envio</td>
@@ -731,25 +732,22 @@ img {
           <td class="content-table" v-else-if="item.state == 'cambio_tienda'">Cambio de tienda</td>
           <td class="content-table" v-else-if="item.state == 'programado'">Programado</td>
           <td class="content-table" v-else-if="item.state == 'cargado'"></td>
+          <td class="content-table" v-else-if="item.state == 'eliminado'">Retirar</td>
           <td class="content-table" v-else></td>
-          
-          <td class="content-table"  v-if="item.state != 'cargado'"> <span v-bind:id="item.id" v-on:click="update_status_order($event)" class="status inactive ">Cargar</span> </td>
+          <td class="content-table"  v-if="item.state != 'cargado' && item.state != 'eliminado'"> <button v-bind:id="item.id" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Cargar</button> </td>
           <td class="content-table"  v-else><span class="status active">Listo</span></td>
         </tr>
         <tr v-for="(item2, index2) in item.productos.slice(1)" :key="index2">
           <td></td>
-          <td></td>
-          <td colspan="2">
-            <tr style="width:94%; display:table; padding-bottom: 10px;">
-              <td rowspan="1" class="content-sub-table" style="text-align:left; padding-bottom: 11px;">
-                <div class="images" v-viewer="{toolbar: false, navbar: false, title: false}">
+              <td rowspan="1" class="content-sub-table" style="text-align:left; padding-bottom: 11px; width: 43%;">
+                <div class="images" style="font-size: small" v-viewer="{toolbar: false, navbar: false, title: false}">
                   <img :src="item2.url_image" />
                   {{item2.product_model}}
                 </div>
               </td>
-              <td class="content-sub-table" style="text-align:right"> {{ item2.quantity}} </td>
-            </tr>
-          </td>
+              <td class="content-sub-table" style=""> {{ item2.quantity}} </td>
+              <td class="content-sub-table" style="" v-if="item.state != 'cargado' && item.state != 'eliminado'"> <input class="form-check-input" type="checkbox" v-bind:aria-label="item.id" v-on:click="update_checked($event)" v-model="item2.loaded" v-bind:id="[index2 == 0 ? 1 : index2 + 1]"> </td>
+              <td class="content-sub-table" v-else></td>
         </tr>
       </template>
     </tbody>
@@ -784,7 +782,6 @@ const database = getDatabase(app);
 const initialState = () => {
   return{
     data: [],
-    active: false,
     }
 }
 
@@ -814,6 +811,7 @@ export default{
       onValue(refSales, (snapshot) => {        
         let data_sales = [];
         let salesData = snapshot.val();
+        let disable = false;
         console.log(salesData);
 
         for (let key in salesData) {
@@ -843,17 +841,34 @@ export default{
             let pickup_date = sale.data_hiboutik.pickup_date == "0000-00-00 00:00:00" ? '-' : sale.data_hiboutik.pickup_date;
 
             for(let i=0; i < line_items.length; i++){
-              let product_id = line_items[i].product_id;
-              let product_name = line_items[i].product_model;
-              line_items[i].product_model = product_name.charAt(0).toUpperCase() + product_name.slice(1).toLowerCase();
+                let product_id = line_items[i].product_id;
+                let product_name = line_items[i].product_model;
+                console.log(product_name+' '+key);
+                line_items[i]['product_model'] = product_name.charAt(0).toUpperCase() + product_name.slice(1).toLowerCase();
+                line_items[i]['url_image'] = 'https://btcmarket.hiboutik.com/images/products/big_'+product_id+'-1.jpg';
+                line_items[i]['loader'] == 'false' ? line_items[i]['loader'] = false : line_items[i]['loader'] = true;
+              
+              /*
               if(product_id == '3019'){
                 line_items.splice(i, 1)
               }else{
                 line_items[i]['url_image'] = 'https://btcmarket.hiboutik.com/images/products/big_'+product_id+'-1.jpg';
-              }
+                console.log('venta numero '+key+' '+line_items[i]['url_image']);
+              }*/
             }
 
-            this.data = [];
+            let filtered = line_items.filter(function(element){
+              //console.warn('id: '+key+' '+ element);
+              return element.loaded == 'false';
+            });
+
+            //console.log(filtered);
+
+            if(filtered.length > 0){
+              disable = false;
+            }else{
+              disable = true;
+            }
 
             data_sales.push({
               id: key,
@@ -861,6 +876,7 @@ export default{
               state: status,
               fecha_carga: date_load,
               fecha_programado: pickup_date,
+              button: disable,
             });
           }     
         }
@@ -877,6 +893,8 @@ export default{
         for(let i=0; i < data_sales.length; i++){
           switch(data_sales[i].state){
             case 'no_cargado':
+
+
               array1.unshift(data_sales[i]);
 
               break;
@@ -893,19 +911,22 @@ export default{
 
               break;
             case 'programado':
-              console.log(data_sales[i].id)
-              console.log(data_sales[i].state)
+
               array5.unshift(data_sales[i]);
 
               break;
             case 'cambio_tienda':
-              console.log(data_sales[i].id)
-              console.log(data_sales[i].state)
+
               array6.unshift(data_sales[i]);
 
               break;
-            case 'cargado':
+            case 'eliminado':
               array7.unshift(data_sales[i]);
+
+              break;
+
+            case 'cargado':
+              array8.unshift(data_sales[i]);
 
               break;
           }
@@ -939,10 +960,14 @@ export default{
           return b.fecha_carga.localeCompare(a.fecha_carga);
         })
 
-        const array_final = [...array1, ...array2, ...array3, ...array4, ...array5, ...array6, ...array7];
+        array8.sort(function(a,b){
+          return b.fecha_carga.localeCompare(a.fecha_carga);
+        })
+
+        const array_final = [...array1, ...array2, ...array3, ...array4, ...array5, ...array6, ...array7, ...array8];
 
         this.data = array_final;
-        console.log(this.data);
+        //console.log(this.data);
       });
     },
 
@@ -962,7 +987,26 @@ export default{
     },
     clickImage: function(index){
         console.log(index)
-    }
+    },
+
+    update_checked(event){
+      const id_sale = event.target.ariaLabel;
+      let id_product = event.target.id;
+      const checked = event.target.checked;
+
+      console.warn('sale_id: '+id_sale+' product_id: '+id_product+' checked: '+checked);
+      
+      axios.post('https://us-central1-holospet.cloudfunctions.net/app/update_checked/'+id_sale, {
+        sale_id: id_sale,
+        product_id: id_product,
+        checked: checked,
+        store_id: 1
+      }).then(response => {
+        console.log(response);
+      }).catch(error => {
+        console.log(error);
+      });
+    },
   }
 }
 

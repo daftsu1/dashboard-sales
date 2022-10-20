@@ -699,7 +699,13 @@ img {
 
 <template>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+<meta name="mobile-web-app-capable" content="yes">
 <div style="background-color: #101827">
+  <div class="row">
+    <div class="col-12">
+      <input class="form-control" type="text" v-model="search" placeholder="Buscar">
+    </div>
+  </div>
   <table class="table" style="width: 98%; margin-left: 1rem; margin-right: 63rem;border-radius: 1em; overflow: hidden;">
     <thead class="header-table">
       <tr>
@@ -713,7 +719,7 @@ img {
     </thead>
     <tbody id="tbody_sale">
       <template v-for="(item) in data">
-        <tr>
+        <tr v-if="`${item.id} ${item.state} ${item.productos[0].product_model} ${item.state}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
           <td class="content-table">{{item.id}}</td>
           <td class="content-table" style="text-align:left;">
             <div style="font-size: small" class="images" v-viewer="{toolbar: false, navbar: false, title: false}">
@@ -737,18 +743,20 @@ img {
           <td class="content-table"  v-if="item.state != 'cargado' && item.state != 'eliminado'"> <button v-bind:id="item.id" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Cargar</button> </td>
           <td class="content-table"  v-else><span class="status active">Listo</span></td>
         </tr>
-        <tr v-for="(item2, index2) in item.productos.slice(1)" :key="index2">
-          <td></td>
-              <td rowspan="1" class="content-sub-table" style="text-align:left; padding-bottom: 11px; width: 43%;">
-                <div class="images" style="font-size: small" v-viewer="{toolbar: false, navbar: false, title: false}">
-                  <img :src="item2.url_image" />
-                  {{item2.product_model}}
-                </div>
-              </td>
-              <td class="content-sub-table" style=""> {{ item2.quantity}} </td>
-              <td class="content-sub-table" style="" v-if="item.state != 'cargado' && item.state != 'eliminado'"> <input class="form-check-input" type="checkbox" v-bind:aria-label="item.id" v-on:click="update_checked($event)" v-model="item2.loaded" v-bind:id="[index2 == 0 ? 1 : index2 + 1]"> </td>
-              <td class="content-sub-table" v-else></td>
-        </tr>
+        <template v-for="(item2, index2) in item.productos.slice(1)">
+          <tr :key="index2" v-if="`${item.id} ${item2.product_model}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
+            <td></td>
+                <td rowspan="1" class="content-sub-table" style="text-align:left; padding-bottom: 11px; width: 43%;">
+                  <div class="images" style="font-size: small" v-viewer="{toolbar: false, navbar: false, title: false}">
+                    <img :src="item2.url_image" />
+                    {{item2.product_model}}
+                  </div>
+                </td>
+                <td class="content-sub-table" style=""> {{ item2.quantity}} </td>
+                <td class="content-sub-table" style="" v-if="item.state != 'cargado' && item.state != 'eliminado'"> <input class="form-check-input" type="checkbox" v-bind:aria-label="item.id" v-on:click="update_checked($event)" v-model="item2.loaded" v-bind:id="[index2 == 0 ? 1 : index2 + 1]"> </td>
+                <td class="content-sub-table" v-else></td>
+          </tr>
+        </template>       
       </template>
     </tbody>
   </table>
@@ -756,7 +764,7 @@ img {
 </template>
 
 <script>
-import { getDatabase, limitToLast, onValue, orderByChild, query, ref } from "firebase/database";
+import { getDatabase, limitToLast, limitToFirst, onValue, orderByChild, query, ref } from "firebase/database";
 import { initializeApp } from "firebase/app";
 import axios from 'axios';
 import "viewerjs/dist/viewer.css";
@@ -782,6 +790,7 @@ const database = getDatabase(app);
 const initialState = () => {
   return{
     data: [],
+    search: '',
     }
 }
 
@@ -843,7 +852,7 @@ export default{
             for(let i=0; i < line_items.length; i++){
                 let product_id = line_items[i].product_id;
                 let product_name = line_items[i].product_model;
-                console.log(product_name+' '+key);
+                //console.log(product_name+' '+key);
                 line_items[i]['product_model'] = product_name.charAt(0).toUpperCase() + product_name.slice(1).toLowerCase();
                 line_items[i]['url_image'] = 'https://btcmarket.hiboutik.com/images/products/big_'+product_id+'-1.jpg';
                 line_items[i]['loader'] == 'false' ? line_items[i]['loader'] = false : line_items[i]['loader'] = true;
@@ -978,7 +987,8 @@ export default{
 
       axios.post('https://us-central1-holospet.cloudfunctions.net/app/update_status_loader/'+id_sale, {
         sale_id: id_sale,
-        status: status
+        status: status,
+        store_id: 1
       }).then(response => {
         console.log(response);
       }).catch(error => {

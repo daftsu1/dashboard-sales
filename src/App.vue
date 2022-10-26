@@ -729,7 +729,7 @@ img {
             
           </td>
           <td class="content-table">{{item.productos[0].quantity}}</td>
-          <td class="content-table" v-if="item.state != 'cargado' && item.state != 'eliminado'"><input style="padding: 0px" class="form-check-input" type="checkbox" v-bind:aria-label="item.id" v-on:click="update_checked($event)" v-model="item.productos[0].loaded" id="0"></td>
+          <td class="content-table" v-if="item.state != 'cargado' && item.state != 'eliminado'"><input style="padding: 0px" class="form-check-input" type="checkbox" v-bind:aria-label="item.id" v-model="item.productos[0].loaded" id="0"></td>
           <td class="content-table" v-else></td>
           <td class="content-table"  v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]" v-if="item.state == 'no_cargado'">Delivery <span v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">inventory_2</span></td>
           <td class="content-table" v-else-if="item.state == 'preparar_retiro'">Retiro en tienda</td>
@@ -753,7 +753,7 @@ img {
                   </div>
                 </td>
                 <td class="content-sub-table" style=""> {{ item2.quantity}} </td>
-                <td class="content-sub-table" style="" v-if="item.state != 'cargado' && item.state != 'eliminado'"> <input class="form-check-input" type="checkbox" v-bind:aria-label="item.id" v-on:click="update_checked($event)" v-model="item2.loaded" v-bind:id="[index2 == 0 ? 1 : index2 + 1]"> </td>
+                <td class="content-sub-table" style="" v-if="item.state != 'cargado' && item.state != 'eliminado'"> <input class="form-check-input" type="checkbox" v-bind:aria-label="item.id"  v-model="item2.loaded" v-bind:id="[index2 == 0 ? 1 : index2 + 1]"> </td>
                 <td class="content-sub-table" v-else></td>
           </tr>
         </template>       
@@ -815,7 +815,8 @@ export default{
   methods:{
     async getSales() {
       const refSales = query(ref(database, 'store'), limitToLast(60));
-      
+      const dayMonth = new Date().getDate() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getFullYear();
+      console.log(dayMonth);    
       //agregar estados preparar pedido-cargar pedido .... y el estado actual, si se preparo o no o si ya se cargo o no.
       onValue(refSales, (snapshot) => {        
         let data_sales = [];
@@ -824,7 +825,12 @@ export default{
         console.log(salesData);
 
         for (let key in salesData) {
-          if(salesData[key].data_hiboutik.completed_at =! null){
+          let fullDate = salesData[key].data_loader.date_loader;
+          let date = fullDate.split(' ')[0];
+
+
+          console.log(date);
+          if(date == dayMonth){
             let sale = salesData[key];
             let line_items = sale.data_hiboutik.line_items == "" ? 'no definida' : sale.data_hiboutik.line_items;
             let comment_hb;

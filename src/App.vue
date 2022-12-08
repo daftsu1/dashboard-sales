@@ -729,7 +729,7 @@ img {
             
           </td>
           <td class="content-table">{{item.productos[0].quantity}}</td>
-          <td class="content-table" v-if="item.state != 'cargado' && item.state != 'eliminado'"><input style="padding: 0px" class="form-check-input" @click="update_checked($event)" type="checkbox" v-bind:aria-label="item.id" v-model="item.productos[0].loaded" id="0"></td>
+          <td class="content-table" v-if="item.state != 'cargado' || item.state == 'eliminado'"><input style="padding: 0px" class="form-check-input" @click="update_checked($event)" type="checkbox" v-bind:aria-label="item.id" v-model="item.productos[0].loaded" id="0"></td>
           <td class="content-table" v-else></td>
           <td class="content-table"  v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]" v-if="item.state == 'no_cargado'">Delivery <span v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">inventory_2</span></td>
           <td class="content-table" v-else-if="item.state == 'preparar_retiro'">Retiro en tienda</td>
@@ -740,7 +740,7 @@ img {
           <td class="content-table" v-else-if="item.state == 'cargado'"></td>
           <td class="content-table" v-else-if="item.state == 'eliminado'">Retirar</td>
           <td class="content-table" v-else></td>
-          <td class="content-table"  v-if="item.state != 'cargado' && item.state != 'eliminado'"> <button v-bind:id="item.id" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Cargar</button> </td>
+          <td class="content-table"  v-if="item.state != 'cargado' || item.state == 'eliminado'"> <button v-bind:id="item.id" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Cargar</button> </td>
           <td class="content-table"  v-else><span class="status active">Listo</span></td>
         </tr>
         <template v-for="(item2, index2) in item.productos.slice(1)">
@@ -753,7 +753,7 @@ img {
                   </div>
                 </td>
                 <td class="content-sub-table" style=""> {{ item2.quantity}} </td>
-                <td class="content-sub-table" style="" v-if="item.state != 'cargado' && item.state != 'eliminado'"> <input class="form-check-input" @click="update_checked($event)" type="checkbox" v-bind:aria-label="item.id"  v-model="item2.loaded" v-bind:id="[index2 == 0 ? 1 : index2 + 1]"> </td>
+                <td class="content-sub-table" style="" v-if="item.state != 'cargado' || item.state == 'eliminado'"> <input class="form-check-input" @click="update_checked($event)" type="checkbox" v-bind:aria-label="item.id"  v-model="item2.loaded" v-bind:id="[index2 == 0 ? 1 : index2 + 1]"> </td>
                 <td class="content-sub-table" v-else></td>
           </tr>
         </template>       
@@ -818,7 +818,7 @@ export default{
 
   methods:{
     async getSales() {
-      const refSales = query(ref(database, 'store'), limitToLast(60));
+      const refSales = query(ref(database, 'warehouse'), limitToLast(500));
       let date        = new Date();
       let day         = date.getDate();
       if(day <= 9){
@@ -1003,7 +1003,7 @@ export default{
       axios.post('https://us-central1-holospet.cloudfunctions.net/app/update_status_loader/'+id_sale, {
         sale_id: id_sale,
         status: status,
-        store_id: 1
+        store_id: 2
       }).then(response => {
         console.log(response);
       }).catch(error => {
@@ -1025,7 +1025,7 @@ export default{
         sale_id: id_sale,
         product_id: id_product,
         checked: checked,
-        store_id: 1
+        store_id: 2
       }).then(response => {
         console.log(response);
       }).catch(error => {

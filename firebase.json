@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "tablet-holospet-bodega",
+    "site": "tablet-holospet",
     "public": "dist",
     "ignore": [
       "firebase.json",

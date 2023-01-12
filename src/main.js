@@ -8,5 +8,6 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 import 'viewerjs/dist/viewer.css'
 import VueViewer from 'v-viewer'
+//import { VueFire } from 'vuefire'
 
 const app = createApp(App).use(router).use(VueViewer).use(VueAxios, axios).mount('#app')

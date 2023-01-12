@@ -694,6 +694,10 @@ img {
   color: red;
 }
 
+.green{
+  color: green;
+}
+
 </style>
 <template>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
@@ -717,8 +721,8 @@ img {
       </thead>
       <tbody id="tbody_sale">
         <template v-for="(item) in sales">
-          <tr v-if="`${item.id} ${item.state} ${item.productos[0].product_model} ${item.state}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
-            <td class="content-table" data-microtip-position="right" role="tooltip" :aria-label="item.fecha_carga"><b>{{item.id}}</b><br> <p style="font-size: 10px;">{{ item.fecha_carga}}</p></td>
+          <tr v-if="`${item.id} ${item.state} ${item.productos[0].product_model} ${item.productos[0].product_id} ${item.state}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
+            <td class="content-table" data-microtip-position="right" role="tooltip" :aria-label="item.fecha_carga"><span v-bind:class="[(item.completed_at == '-' ? 'green' : 'color')]" class="material-symbols-outlined">{{item.icon_sale}}</span> <b><a :href="'https://btcmarket.hiboutik.com/?ca='+item.id " target="_blank">{{item.id}}</a></b><br> <p style="font-size: 10px;">{{ item.fecha_carga}}</p></td>
             <td class="content-table" style="text-align:left;">
               <div style="font-size: small" class="images" v-viewer="{toolbar: false, navbar: false, title: false}">
                 <img :src="item.productos[0].url_image" />
@@ -741,7 +745,7 @@ img {
             <td class="content-table" v-else-if="item.state == 'cargado'"></td>
             <td class="content-table" v-else-if="item.state == 'eliminado'">Retirar</td>
 
-            <td class="content-table"  v-if="item.state != 'cargado' || item.state == 'eliminado'"> <button v-bind:id="item.id" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Cargar</button> </td>
+            <td class="content-table"  v-if="item.state != 'cargado' || item.state == 'eliminado'"> <button v-bind:id="item.class_sale" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Cargar</button> </td>
             <td class="content-table"  v-else><span class="status active">Listo</span></td>
           </tr>
           <template v-for="(item2, index2) in item.productos.slice(1)">
@@ -866,6 +870,15 @@ export default {
 
               dayjs(aux2).isBefore(aux3) ? programed_ready = true : programed_ready = false;
             }
+
+            let completed_at = sale.data_hiboutik.completed_at;
+            let icon = '';
+            if(completed_at == '0000-00-00 00:00:00'){
+              completed_at = '-';
+              icon = 'lock_open';
+            }else{
+              icon = 'lock';
+            }
             
             /*
             if(pickup_date != '-' && status == 'cargado'){
@@ -893,6 +906,9 @@ export default {
               button: disable,
               date: datetime,
               programed_ready: programed_ready,
+              class_sale: key+'-'+status,
+              completed_at : completed_at,
+              icon_sale: icon,
             });
           
       });
@@ -982,6 +998,7 @@ export default {
        const array_final = [...array1, ...array2, ...array3, ...array4, ...array5, ...array6, ...array7, ...array8];
 
       this.sales = array_final;
+      this.playSound();
 
       console.log(_sales)
     },
@@ -997,13 +1014,39 @@ export default {
 
     update_status_order(event) {
       const status = 'cargado';
-      const id_sale = event.target.id;
+      const class_sale = event.target.id;
+      const id_sale = class_sale.split('-')[0];
+      const status_sale = class_sale.split('-')[1];
       console.log(event.target.id);
+
+      if(status_sale == 'preparar_retiro'){
+        console.log('entro a imprimir estado: ' + status_sale + ' id: ' + id_sale);
+        const params = {
+          sale_id: id_sale,
+        };
+        axios.get('http://192.168.1.110/holospet/print_label.php', { params }).then(response => {
+          console.log(response);
+        }).catch(error => {
+          console.log(error);
+        });
+      }
+
+      if(status_sale == 'envio_chilexpress' || status_sale == 'envio'){
+        console.log('entro a imprimir estado: ' + status_sale + ' id: ' + id_sale);
+        const params = {
+          sale_id: id_sale,
+        };
+        axios.get('http://192.168.1.110/holospet/print_label_send_sale.php', { params }).then(response => {
+          console.log(response);
+        }).catch(error => {
+          console.log(error);
+        });
+      }
 
       axios.post('https://us-central1-holospet.cloudfunctions.net/app/update_status_loader/'+id_sale, {
         sale_id: id_sale,
         status: status,
-        store_id: 2
+        store_id: 1
       }).then(response => {
         console.log(response);
       }).catch(error => {
@@ -1025,19 +1068,23 @@ export default {
         sale_id: id_sale,
         product_id: id_product,
         checked: checked,
-        store_id: 2
+        store_id: 1
       }).then(response => {
         console.log(response);
       }).catch(error => {
         console.log(error);
       });
     },
+
+    playSound(){
+      let audio = new Audio('http://soundbible.com/mp3/Air Plane Ding-SoundBible.com-496729130.mp3');
+      audio.play();
+    }
     
   },
 
   mounted() {
     SaleDataService.getAll().on("value", this.onDataChange);
-
   },
 }
 </script>

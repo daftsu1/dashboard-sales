@@ -1,6 +1,6 @@
 import firebase from "../firebase";
 
-const db = firebase.ref("/warehouse").limitToLast(200);
+const db = firebase.ref("store").limitToLast(400);
 
 class SaleDataService {
     getAll() {

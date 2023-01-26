@@ -733,8 +733,7 @@ img {
             <td class="content-table">{{item.productos[0].quantity}}</td>
             <td class="content-table" v-if="item.state != 'cargado' || item.state == 'eliminado'"><input style="padding: 0px" class="form-check-input" @click="update_checked($event)" type="checkbox" v-bind:aria-label="item.id" v-model="item.productos[0].loaded" id="0"></td>
             <td class="content-table" v-else></td>
-
-            <td class="content-table" v-if="item.state == 'no_cargado'">Delivery <span v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p></td>
+            <td class="content-table" v-if="item.state == 'no_cargado'">Delivery <span v-bi                   nd:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p></td>
             <td class="content-table" v-else-if="item.action == 'retiro_tienda'">Retiro en tienda</td>
             <td class="content-table" v-else-if="item.action == 'envio'">Preparar envio</td>
             <td class="content-table" style="color: #ffb81c" v-else-if="item.action == 'send_chilexpress'">Chilexpress</td>
@@ -879,6 +878,11 @@ export default {
             }else{
               icon = 'lock';
             }
+
+            let customers_phone = sale.data_hiboutik.customers_phone;
+            if(customers_phone == '' || customers_phone == null || customers_phone == undefined){
+              customers_phone = '-';
+            }
             
             /*
             if(pickup_date != '-' && status == 'cargado'){
@@ -909,6 +913,7 @@ export default {
               class_sale: key+'-'+status,
               completed_at : completed_at,
               icon_sale: icon,
+              customers_phone: customers_phone,
             });
           
       });
@@ -1019,12 +1024,23 @@ export default {
       const status_sale = class_sale.split('-')[1];
       console.log(event.target.id);
 
+      let sale = this.sales.find(sale => sale.id == id_sale);
+      console.log(sale);
+
       if(status_sale == 'preparar_retiro'){
         console.log('entro a imprimir estado: ' + status_sale + ' id: ' + id_sale);
         const params = {
           sale_id: id_sale,
+          customers_phone: sale.customers_phone
         };
-        axios.get('http://192.168.1.110/holospet/print_label.php', { params }).then(response => {
+        
+        axios.get('http://192.168.1.113/print_label.php', { params }).then(response => {
+          console.log(response);
+        }).catch(error => {
+          console.log(error);
+        });
+
+        axios.get('http://192.168.1.113/message_pickup.php' , { params }).then(response => {
           console.log(response);
         }).catch(error => {
           console.log(error);
@@ -1036,7 +1052,7 @@ export default {
         const params = {
           sale_id: id_sale,
         };
-        axios.get('http://192.168.1.110/holospet/print_label_send_sale.php', { params }).then(response => {
+        axios.get('http://192.168.1.113/print_label_send_sale.php', { params }).then(response => {
           console.log(response);
         }).catch(error => {
           console.log(error);

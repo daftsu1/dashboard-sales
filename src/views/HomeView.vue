@@ -721,7 +721,7 @@ img {
       </thead>
       <tbody id="tbody_sale">
         <template v-for="(item) in sales">
-          <tr v-if="`${item.id} ${item.state} ${item.productos[0].product_model} ${item.productos[0].product_id} ${item.state}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
+          <tr v-if="`${item.id} ${item.state} ${item.productos[0].product_model} ${item.productos[0].product_id} ${item.state} ${item.action}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
             <td class="content-table" data-microtip-position="right" role="tooltip" :aria-label="item.fecha_carga"><span v-bind:class="[(item.completed_at == '-' ? 'green' : 'color')]" class="material-symbols-outlined">{{item.icon_sale}}</span> <b><a :href="'https://btcmarket.hiboutik.com/?ca='+item.id " target="_blank">{{item.id}}</a></b><br> <p style="font-size: 10px;">{{ item.fecha_carga}}</p></td>
             <td class="content-table" style="text-align:left;">
               <div style="font-size: small" class="images" v-viewer="{toolbar: false, navbar: false, title: false}">
@@ -733,7 +733,7 @@ img {
             <td class="content-table">{{item.productos[0].quantity}}</td>
             <td class="content-table" v-if="item.state != 'cargado' || item.state == 'eliminado'"><input style="padding: 0px" class="form-check-input" @click="update_checked($event)" type="checkbox" v-bind:aria-label="item.id" v-model="item.productos[0].loaded" id="0"></td>
             <td class="content-table" v-else></td>
-            <td class="content-table" v-if="item.state == 'no_cargado'">Delivery <span v-bi                   nd:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p></td>
+            <td class="content-table" v-if="item.state == 'no_cargado'">Delivery <span v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p></td>
             <td class="content-table" v-else-if="item.action == 'retiro_tienda'">Retiro en tienda</td>
             <td class="content-table" v-else-if="item.action == 'envio'">Preparar envio</td>
             <td class="content-table" style="color: #ffb81c" v-else-if="item.action == 'send_chilexpress'">Chilexpress</td>

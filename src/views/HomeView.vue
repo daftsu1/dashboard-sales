@@ -1,4 +1,5 @@
 <style lang="scss">
+@import 'microtip';
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap');
 
 * { box-sizing: border-box; }
@@ -721,14 +722,13 @@ img {
       </thead>
       <tbody id="tbody_sale">
         <template v-for="(item) in sales">
-          <tr v-if="`${item.id} ${item.state} ${item.productos[0].product_model} ${item.productos[0].product_id} ${item.state} ${item.action}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
-            <td class="content-table" data-microtip-position="right" role="tooltip" :aria-label="item.fecha_carga"><span v-bind:class="[(item.completed_at == '-' ? 'green' : 'color')]" class="material-symbols-outlined">{{item.icon_sale}}</span> <b><a :href="'https://btcmarket.hiboutik.com/?ca='+item.id " target="_blank">{{item.id}}</a></b><br> <p style="font-size: 10px;">{{ item.fecha_carga}}</p></td>
+          <tr v-if="`${item.id} ${item.state} ${item.productos[0].product_model} ${item.productos[0].product_id} ${item.state} ${item.action} ${item.cliente}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
+            <td class="content-table" data-microtip-position="right" role="tooltip" :aria-label="item.cliente"><span v-bind:class="[(item.completed_at == '-' ? 'green' : 'color')]" class="material-symbols-outlined">{{item.icon_sale}}</span> <b><a :href="'https://btcmarket.hiboutik.com/?ca='+item.id " target="_blank">{{item.id}}</a></b><br> <p style="font-size: 10px;">{{ item.fecha_carga}}</p></td>
             <td class="content-table" style="text-align:left;">
               <div style="font-size: small" class="images" v-viewer="{toolbar: false, navbar: false, title: false}">
                 <img :src="item.productos[0].url_image" />
                 {{item.productos[0].product_model}}
               </div>
-              
             </td>
             <td class="content-table">{{item.productos[0].quantity}}</td>
             <td class="content-table" v-if="item.state != 'cargado' || item.state == 'eliminado'"><input style="padding: 0px" class="form-check-input" @click="update_checked($event)" type="checkbox" v-bind:aria-label="item.id" v-model="item.productos[0].loaded" id="0"></td>
@@ -811,6 +811,11 @@ export default {
             let disable = false;
             let datetime = '';
             let programed_ready = false;
+            let customer = '';
+
+            if(sale.data_hiboutik.customers_first_name != "" && sale.data_hiboutik.customers_first_name != null && sale.data_hiboutik.customers_first_name != undefined){
+              customer = sale.data_hiboutik.customers_first_name == "" ? '-': sale.data_hiboutik.customers_first_name + ' ' + sale.data_hiboutik.customers_last_name;
+            }
 
             if(sale.data_hiboutik.comments != "" && sale.data_hiboutik.comments != null && sale.data_hiboutik.comments != undefined){
               comment_hb = sale.data_hiboutik.comments == "" ? '-': sale.data_hiboutik.comments;
@@ -854,7 +859,6 @@ export default {
 
               return element.loaded == 'false';
             });
-
 
             if(filtered.length > 0){
               disable = false;
@@ -914,6 +918,7 @@ export default {
               completed_at : completed_at,
               icon_sale: icon,
               customers_phone: customers_phone,
+              cliente : customer
             });
           
       });
@@ -1026,7 +1031,7 @@ export default {
 
       let sale = this.sales.find(sale => sale.id == id_sale);
       console.log(sale);
-
+      
       if(status_sale == 'preparar_retiro'){
         console.log('entro a imprimir estado: ' + status_sale + ' id: ' + id_sale);
         const params = {

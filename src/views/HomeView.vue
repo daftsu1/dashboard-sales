@@ -1052,7 +1052,7 @@ export default {
         });
       }
 
-      if(status_sale == 'envio_chilexpress' || status_sale == 'envio'){
+      if(status_sale == 'envio'){
         console.log('entro a imprimir estado: ' + status_sale + ' id: ' + id_sale);
         const params = {
           sale_id: id_sale,

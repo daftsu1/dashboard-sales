@@ -1,6 +1,6 @@
 import firebase from "../firebase";
 
-const db = firebase.ref("warehouse");
+const db = firebase.ref("store");
 
 class SaleDataService {
     getAll() {

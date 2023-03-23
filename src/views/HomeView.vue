@@ -712,7 +712,7 @@ img {
     <table class="table" style="width: 98%; margin-left: 1rem; margin-right: 63rem;border-radius: 1em; overflow: hidden;">
       <thead class="header-table">
         <tr>
-            <th scope="col" style="width: 76px" class="cell-table">Id Venta</th>
+            <th scope="col" style="width: 7%" class="cell-table">Id Venta</th>
             <th scope="col" class="cell-table">Producto</th>
             <th scope="col" style="text-align: left;" class="cell-table">Cantidad</th>
             <th scope="col" style="text-align: left;" class="cell-table">Check</th>
@@ -733,14 +733,14 @@ img {
             <td class="content-table">{{item.productos[0].quantity}}</td>
             <td class="content-table" v-if="item.state != 'cargado' || item.state == 'eliminado'"><input style="padding: 0px" class="form-check-input" @click="update_checked($event)" type="checkbox" v-bind:aria-label="item.id" v-model="item.productos[0].loaded" id="0"></td>
             <td class="content-table" v-else></td>
-            <td class="content-table" v-if="item.state == 'no_cargado'">Delivery <span v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p> {{item.counter}}</td>
-            <td class="content-table" v-else-if="item.action == 'retiro_tienda'">Retiro en tienda {{item.counter}}</td>
-            <td class="content-table" v-else-if="item.action == 'envio'">Preparar envio {{item.counter}}</td>
-            <td class="content-table" style="color: #ffb81c" v-else-if="item.action == 'send_chilexpress'">Chilexpress {{item.counter}}</td>
-            <td class="content-table" v-else-if="item.state == 'cambio_tienda'">Cambio de tienda {{item.counter}}</td>
-            <td class="content-table" v-else-if="item.state == 'cargado' && item.programed_ready == true && item.fecha_programado != '-'">Delivery <span v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p>{{item.counter}}</td>
-            <td class="content-table" v-else-if="item.state == 'cargado' && item.fecha_programado != '-'">Programado <br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p>{{item.counter}}</td>
-            <td class="content-table" v-else-if="item.state == 'programado'">Programado <br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p>{{item.counter}}</td>
+            <td class="content-table" v-if="item.state == 'no_cargado'">Delivery <span v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p> <p class="color">{{item.counter}}</p></td>
+            <td class="content-table" v-else-if="item.action == 'retiro_tienda'">Retiro en tienda <p class="color">{{item.counter}}</p></td>
+            <td class="content-table" v-else-if="item.action == 'envio'">Preparar envio <p class="color">{{item.counter}}</p></td>
+            <td class="content-table" style="color: #ffb81c" v-else-if="item.action == 'send_chilexpress'">Chilexpress <p class="color">{{item.counter}}</p></td>
+            <td class="content-table" v-else-if="item.state == 'cambio_tienda'">Cambio de tienda <p class="color">{{item.counter}}</p></td>
+            <td class="content-table" v-else-if="item.state == 'cargado' && item.programed_ready == true && item.fecha_programado != '-'">Delivery <span v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p><p class="color">{{item.counter}}</p></td>
+            <td class="content-table" v-else-if="item.state == 'cargado' && item.fecha_programado != '-'">Programado <br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p><p class="color">{{item.counter}}</p></td>
+            <td class="content-table" v-else-if="item.state == 'programado'">Programado <br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p><p class="color">{{item.counter}}</p></td>
             <td class="content-table" v-else-if="item.state == 'cargado'"></td>
             <td class="content-table" v-else-if="item.state == 'eliminado'">Retirar</td>
 
@@ -748,7 +748,7 @@ img {
             <td class="content-table"  v-else><span class="status active">Listo</span></td>
           </tr>
           <template v-for="(item2, index2) in item.productos.slice(1)">
-            <tr :key="index2" v-if="`${item.id} ${item2.product_model}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
+            <tr :key="index2" v-if="`${item.id} ${item2.product_model} ${item.productos[0].product_id} ${item.state} ${item.action} ${item.cliente}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
               <td></td>
                   <td rowspan="1" class="content-sub-table" style="text-align:left; padding-bottom: 11px; width: 43%;">
                     <div class="images" style="font-size: small" v-viewer="{toolbar: false, navbar: false, title: false}">

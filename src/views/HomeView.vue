@@ -1043,7 +1043,7 @@ export default {
 
       let sale = this.sales.find(sale => sale.id == id_sale);
       console.log(sale);
-      /*
+      
       if(status_sale == 'preparar_retiro'){
         console.log('entro a imprimir estado: ' + status_sale + ' id: ' + id_sale);
         const params = {
@@ -1074,12 +1074,12 @@ export default {
         }).catch(error => {
           console.log(error);
         });
-      } */
+      } 
 
       axios.post('https://us-central1-holospet.cloudfunctions.net/app/update_status_loader/'+id_sale, {
         sale_id: id_sale,
         status: status,
-        store_id: 2
+        store_id: 1
       }).then(response => {
         console.log(response);
       }).catch(error => {
@@ -1101,7 +1101,7 @@ export default {
         sale_id: id_sale,
         product_id: id_product,
         checked: checked,
-        store_id: 2
+        store_id: 1
       }).then(response => {
         console.log(response);
       }).catch(error => {

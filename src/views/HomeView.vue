@@ -733,14 +733,14 @@ img {
             <td class="content-table">{{item.productos[0].quantity}}</td>
             <td class="content-table" v-if="item.state != 'cargado' || item.state == 'eliminado'"><input style="padding: 0px" class="form-check-input" @click="update_checked($event)" type="checkbox" v-bind:aria-label="item.id" v-model="item.productos[0].loaded" id="0"></td>
             <td class="content-table" v-else></td>
-            <td class="content-table" v-if="item.state == 'no_cargado'">Delivery <span v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p></td>
-            <td class="content-table" v-else-if="item.action == 'retiro_tienda'">Retiro en tienda</td>
-            <td class="content-table" v-else-if="item.action == 'envio'">Preparar envio</td>
-            <td class="content-table" style="color: #ffb81c" v-else-if="item.action == 'send_chilexpress'">Chilexpress</td>
-            <td class="content-table" v-else-if="item.state == 'cambio_tienda'">Cambio de tienda</td>
-            <td class="content-table" v-else-if="item.state == 'cargado' && item.programed_ready == true && item.fecha_programado != '-'">Delivery <span v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p></td>
-            <td class="content-table" v-else-if="item.state == 'cargado' && item.fecha_programado != '-'">Programado <br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p></td>
-            <td class="content-table" v-else-if="item.state == 'programado'">Programado <br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p></td>
+            <td class="content-table" v-if="item.state == 'no_cargado'">Delivery <span v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p> {{item.counter}}</td>
+            <td class="content-table" v-else-if="item.action == 'retiro_tienda'">Retiro en tienda {{item.counter}}</td>
+            <td class="content-table" v-else-if="item.action == 'envio'">Preparar envio {{item.counter}}</td>
+            <td class="content-table" style="color: #ffb81c" v-else-if="item.action == 'send_chilexpress'">Chilexpress {{item.counter}}</td>
+            <td class="content-table" v-else-if="item.state == 'cambio_tienda'">Cambio de tienda {{item.counter}}</td>
+            <td class="content-table" v-else-if="item.state == 'cargado' && item.programed_ready == true && item.fecha_programado != '-'">Delivery <span v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p>{{item.counter}}</td>
+            <td class="content-table" v-else-if="item.state == 'cargado' && item.fecha_programado != '-'">Programado <br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p>{{item.counter}}</td>
+            <td class="content-table" v-else-if="item.state == 'programado'">Programado <br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p>{{item.counter}}</td>
             <td class="content-table" v-else-if="item.state == 'cargado'"></td>
             <td class="content-table" v-else-if="item.state == 'eliminado'">Retirar</td>
 
@@ -887,7 +887,17 @@ export default {
             if(customers_phone == '' || customers_phone == null || customers_phone == undefined){
               customers_phone = '-';
             }
-            
+
+            let counter = sale.data_loader.counter;
+            if(counter == '' || counter == null || counter == undefined){
+              counter = '';
+            }else{
+              if(counter <= 1){
+                counter = '(-)';
+              }else{
+                counter = '('+counter+')';
+              }
+            }
             /*
             if(pickup_date != '-' && status == 'cargado'){
               datetime = new Date(Date.now()).toLocaleString('es-CL',{timeZone: "America/Santiago", day:'numeric',month:'numeric',year:'numeric', hour:'numeric', minute:'numeric', second:'numeric'});
@@ -914,11 +924,13 @@ export default {
               button: disable,
               date: datetime,
               programed_ready: programed_ready,
+
               class_sale: key+'-'+status,
               completed_at : completed_at,
               icon_sale: icon,
               customers_phone: customers_phone,
-              cliente : customer
+              cliente : customer,
+              counter: counter
             });
           
       });
@@ -1031,7 +1043,7 @@ export default {
 
       let sale = this.sales.find(sale => sale.id == id_sale);
       console.log(sale);
-      
+      /*
       if(status_sale == 'preparar_retiro'){
         console.log('entro a imprimir estado: ' + status_sale + ' id: ' + id_sale);
         const params = {
@@ -1062,12 +1074,12 @@ export default {
         }).catch(error => {
           console.log(error);
         });
-      }
+      } */
 
       axios.post('https://us-central1-holospet.cloudfunctions.net/app/update_status_loader/'+id_sale, {
         sale_id: id_sale,
         status: status,
-        store_id: 1
+        store_id: 2
       }).then(response => {
         console.log(response);
       }).catch(error => {
@@ -1089,7 +1101,7 @@ export default {
         sale_id: id_sale,
         product_id: id_product,
         checked: checked,
-        store_id: 1
+        store_id: 2
       }).then(response => {
         console.log(response);
       }).catch(error => {

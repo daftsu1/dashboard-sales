@@ -893,7 +893,7 @@ export default {
               counter = '';
             }else{
               if(counter <= 1){
-                counter = '(-)';
+                counter = '';
               }else{
                 counter = '('+counter+')';
               }
@@ -1074,9 +1074,9 @@ export default {
         }).catch(error => {
           console.log(error);
         });
-      } 
+      }
 
-      axios.post('https://us-central1-holospet.cloudfunctions.net/app/update_status_loader/'+id_sale, {
+      axios.post('https://api-w274ph3ciq-uc.a.run.app/update_status_loader/'+id_sale, {
         sale_id: id_sale,
         status: status,
         store_id: 1
@@ -1097,7 +1097,7 @@ export default {
 
       console.warn('sale_id: '+id_sale+' product_id: '+id_product+' checked: '+checked);
       
-      axios.post('https://us-central1-holospet.cloudfunctions.net/app/update_checked/'+id_sale, {
+      axios.post('https://api-w274ph3ciq-uc.a.run.app/update_checked/'+id_sale, {
         sale_id: id_sale,
         product_id: id_product,
         checked: checked,

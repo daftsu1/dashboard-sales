@@ -745,7 +745,7 @@ img {
             <td class="content-table" v-else-if="item.state == 'eliminado'">Retirar</td>
 
             <td class="content-table" v-if="item.state == 'no_cargado' || item.state == 'preparar_retiro' || item.state == 'envio' || item.state == 'send_chilexpress' || item.state == 'programado'"> <button v-bind:id="item.class_sale" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Cargar</button> </td>
-            <td class="content-table" v-else-if="item.state == 'cambio_tienda' || item.state == 'retirar'"> <button v-bind:id="item.class_sale" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Retirar</button> </td>
+            <td class="content-table" v-else-if="item.state == 'cambio_tienda' || item.state == 'eliminado'"> <button v-bind:id="item.class_sale" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Retirar</button> </td>
             <td class="content-table" v-else><span class="status active">Listo</span></td>
 
           </tr>

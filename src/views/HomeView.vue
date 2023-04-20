@@ -735,8 +735,8 @@ img {
             <td class="content-table" v-else></td>
             <td class="content-table" v-if="item.state == 'no_cargado'">Delivery <span v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p> <p class="color">{{item.counter}}</p></td>
             <td class="content-table" v-else-if="item.action == 'retiro_tienda'">Retiro en tienda <p class="color">{{item.counter}}</p></td>
-            <td class="content-table" v-else-if="item.action == 'envio'">Preparar envio <p class="color">{{item.counter}}</p></td>
-            <td class="content-table" style="color: #ffb81c" v-else-if="item.action == 'send_chilexpress'">Chilexpress <p class="color">{{item.counter}}</p></td>
+            <td class="content-table" v-else-if="item.action == 'envio'">Preparar envio <span v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><p style="font-size: 10px;">{{ item.fecha_programado}}</p> <p class="color">{{item.counter}}</p></td>
+            <td class="content-table" style="color: #ffb81c" v-else-if="item.action == 'send_chilexpress'">Chilexpress <span v-bind:class="[(item.fecha_programado == '-' ? '' : 'color')]"  v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span> <p style="font-size: 10px;">{{ item.fecha_programado}}</p> <p class="color">{{item.counter}}</p></td>
             <td class="content-table" v-else-if="item.state == 'cambio_tienda'">Cambio de tienda <p class="color">{{item.counter}}</p></td>
             <td class="content-table" v-else-if="item.state == 'cargado' && item.programed_ready == true && item.fecha_programado != '-'">Delivery <span v-show="item.fecha_programado == '-' ? '' : 'color'" class="material-symbols-outlined">alarm</span><br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p><p class="color">{{item.counter}}</p></td>
             <td class="content-table" v-else-if="item.state == 'cargado' && item.fecha_programado != '-'">Programado <br> <p style="font-size: 10px;">{{ item.fecha_programado}}</p><p class="color">{{item.counter}}</p></td>
@@ -744,7 +744,7 @@ img {
             <td class="content-table" v-else-if="item.state == 'cargado'"></td>
             <td class="content-table" v-else-if="item.state == 'eliminado'">Retirar</td>
 
-            <td class="content-table" v-if="item.state == 'no_cargado' || item.state == 'preparar_retiro' || item.state == 'envio' || item.state == 'send_chilexpress' || item.state == 'programado'"> <button v-bind:id="item.class_sale" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Cargar</button> </td>
+            <td class="content-table" v-if="item.state == 'no_cargado' || item.state == 'preparar_retiro' || item.state == 'envio' || item.state == 'envio_chilexpress' || item.state == 'programado'"> <button v-bind:id="item.class_sale" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Cargar</button> </td>
             <td class="content-table" v-else-if="item.state == 'cambio_tienda' || item.state == 'eliminado'"> <button v-bind:id="item.class_sale" :disabled="item.button ? false : ''" v-on:click="update_status_order($event)" class="status inactive ">Retirar</button> </td>
             <td class="content-table" v-else><span class="status active">Listo</span></td>
 
@@ -762,7 +762,7 @@ img {
                   <td class="content-sub-table" style="" v-if="item.state != 'cargado' || item.state == 'eliminado'"> <input class="form-check-input" @click="update_checked($event)" type="checkbox" v-bind:aria-label="item.id"  v-model="item2.loaded" v-bind:id="[index2 == 0 ? 1 : index2 + 1]"> </td>
                   <td class="content-sub-table" v-else></td>
             </tr>
-          </template>       
+          </template>
         </template>
       </tbody>
     </table>
@@ -1022,7 +1022,6 @@ export default {
        const array_final = [...array1, ...array2, ...array3, ...array4, ...array5, ...array6, ...array7, ...array8];
 
       this.sales = array_final;
-      this.playSound();
 
       console.log(_sales)
     },
@@ -1115,11 +1114,14 @@ export default {
       let audio = new Audio('http://soundbible.com/mp3/Air Plane Ding-SoundBible.com-496729130.mp3');
       audio.play();
     }
-    
+
   },
 
   mounted() {
     SaleDataService.getAll().on("value", this.onDataChange);
+    SaleDataService.getAll().on("child_added", () => {
+      this.playSound();
+    });
   },
 }
 </script>

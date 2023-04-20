@@ -751,7 +751,8 @@ img {
           </tr>
           <template v-for="(item2, index2) in item.productos.slice(1)">
             <tr :key="index2" v-if="`${item.id} ${item2.product_model} ${item.productos[0].product_id} ${item.state} ${item.action} ${item.cliente}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
-              <td></td>
+              <td v-if="!search"></td>
+              <td  v-else class="content-table" data-microtip-position="right" role="tooltip" :aria-label="item.cliente"><span v-bind:class="[(item.completed_at == '-' ? 'green' : 'color')]" class="material-symbols-outlined">{{item.icon_sale}}</span> <b><a :href="'https://btcmarket.hiboutik.com/?ca='+item.id " target="_blank">{{item.id}}</a></b><br> <p style="font-size: 10px;">{{ item.fecha_carga}}</p></td>
                   <td rowspan="1" class="content-sub-table" style="text-align:left; padding-bottom: 11px; width: 43%;">
                     <div class="images" style="font-size: small" v-viewer="{toolbar: false, navbar: false, title: false}">
                       <img :src="item2.url_image" />

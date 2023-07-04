@@ -699,6 +699,11 @@ img {
   color: green;
 }
 
+td{
+  padding-bottom: 0rem !important;
+  
+}
+
 </style>
 <template>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
@@ -709,7 +714,7 @@ img {
         <input class="form-control" type="text" v-model="search" placeholder="Buscar">
       </div>
     </div>
-    <table class="table" style="width: 98%; margin-left: 1rem; margin-right: 63rem;border-radius: 1em; overflow: hidden;">
+    <table class="table" style="width: 98%; margin-left: 1rem; margin-right: 63rem;border-radius: 1em; overflow: hidden; ">
       <thead class="header-table">
         <tr>
             <th scope="col" style="width: 7%" class="cell-table">Id Venta</th>
@@ -722,8 +727,9 @@ img {
       </thead>
       <tbody id="tbody_sale">
         <template v-for="(item) in sales">
-          <tr v-if="`${item.id} ${item.state} ${item.productos[0].product_model} ${item.productos[0].product_id} ${item.state} ${item.action} ${item.cliente}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
-            <td class="content-table" data-microtip-position="right" role="tooltip" :aria-label="item.cliente"><span v-bind:class="[(item.completed_at == '-' ? 'green' : 'color')]" class="material-symbols-outlined">{{item.icon_sale}}</span> <b><a :href="'https://btcmarket.hiboutik.com/?ca='+item.id " target="_blank">{{item.id}}</a></b><br> <p style="font-size: 10px;">{{ item.fecha_carga}}</p></td>
+          <tr :key="item.id" v-if="`${item.id} ${item.state} ${item.productos[0].product_model} ${item.productos[0].product_id} ${item.state} ${item.action} ${item.cliente}`.search(new RegExp(search, 'i')) >= 0 || search == ''">
+            <td v-if="item.action != 'retiro_tienda'" class="content-table" data-microtip-position="right" role="tooltip" :aria-label="item.cliente"><span v-bind:class="[(item.completed_at == '-' ? 'green' : 'color')]" class="material-symbols-outlined">{{item.icon_sale}}</span> <b><a :href="'https://btcmarket.hiboutik.com/?ca='+item.id " target="_blank">{{item.id}}</a></b><br> <p style="font-size: 10px;">{{ item.fecha_carga}}</p></td>
+            <td v-else class="content-table" data-microtip-position="right" role="tooltip" :aria-label="item.cliente"><span v-bind:class="[(item.completed_at == '-' ? 'green' : 'color')]" class="material-symbols-outlined">{{item.icon_sale}}</span> <b><a :href="'https://btcmarket.hiboutik.com/?ca='+item.id " target="_blank">{{item.id}}</a></b><br> <p style="font-size: 10px; margin-bottom: 0rem;">{{ item.fecha_carga}}</p><p style="font-size: 10px;margin-bottom: 0rem;">{{item.cliente}}</p></td>
             <td class="content-table" style="text-align:left;">
               <div style="font-size: small" class="images" v-viewer="{toolbar: false, navbar: false, title: false}">
                 <img :src="item.productos[0].url_image" />
